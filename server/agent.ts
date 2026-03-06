@@ -1,11 +1,24 @@
 import "dotenv/config";
+import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 
-const agent = new ChatGoogleGenerativeAI({
+const model = new ChatGoogleGenerativeAI({
   model: "gemini-2.5-flash-lite",
   apiKey: process.env.GEMINI_API_KEY,
 });
 
-const res = await agent.invoke("What is the capital of France?")
+const agent = createReactAgent({
+  llm: model,
+  tools: [],
+});
 
-console.log(res)
+const result = await agent.invoke({
+  messages: [
+    {
+      role: "user",
+      content: "What is the capital of France?",
+    },
+  ],
+});
+
+console.log(result?.messages?.[1]?.content);
