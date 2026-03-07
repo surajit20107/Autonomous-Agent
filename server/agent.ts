@@ -1,14 +1,20 @@
 import "dotenv/config";
-import { createReactAgent } from "@langchain/langgraph/prebuilt";
+import { createAgent } from "langchain";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+
+const api_key = process.env.GEMINI_API_KEY;
+
+if (!api_key) {
+  throw new Error("GEMINI_API_KEY is not defined");
+}
 
 const model = new ChatGoogleGenerativeAI({
   model: "gemini-2.5-flash-lite",
-  apiKey: process.env.GEMINI_API_KEY,
+  apiKey: api_key,
 });
 
-const agent = createReactAgent({
-  llm: model,
+const agent = createAgent({
+  model,
   tools: [],
 });
 
