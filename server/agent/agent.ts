@@ -3,13 +3,30 @@ import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { tool } from "langchain";
 import { MemorySaver } from "@langchain/langgraph";
 import { z } from "zod";
+import { NodeVM } from "vm2";
+import "dotenv/config";
 
 const api_key = process.env.GEMINI_API_KEY;
+
 const checkpointer = new MemorySaver();
 
 if (!api_key) {
   throw new Error("GEMINI_API_KEY is not defined");
 }
+
+const vm = new NodeVM({
+  console: "redirect",
+  sandbox: {
+    fetch,
+  },
+  timeout: 5000,
+  eval: false,
+  wasm: false,
+  require: {
+    external: false,
+    builtin: [],
+  },
+});
 
 const get_todos = tool(
   async ({ query }: { query: string }) => {
@@ -30,12 +47,18 @@ const get_todos = tool(
 
 const code_execution = tool(
   async ({ code }: { code: string }) => {
-    const result = await eval(code);
-    return result;
+    console.log("Executing code: ", code);
+    try {
+      const result = await vm.run(code);
+      return result;
+    } catch (error) {
+      return error;
+    }
   },
   {
     name: "code_execution",
-    description: "Execute JavaScript code in Node.js and return the result. The code can use fetch() to call external APIs and retrieve live internet data.",
+    description:
+      "Execute JavaScript code in Node.js and return the result. The code can use fetch() to call external APIs and retrieve live internet data and realtime data like date, time, weather, and much more there are infinity possibilities with this tool.",
     schema: z.object({
       code: z
         .string()
@@ -53,7 +76,7 @@ const model = new ChatGoogleGenerativeAI({
 
 export const agent = createAgent({
   model,
-  tools: [get_todos, code_execution],
+  tools: [code_execution],
   checkpointer,
   systemPrompt: `
 You are an AI agent that can execute JavaScript code using the code_execution tool.

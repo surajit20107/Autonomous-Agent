@@ -36,7 +36,7 @@ app.post("/api/agent", async (req, res) => {
   });
 });
 
-app.post("/api/agent/2", async (req, res) => {
+app.post("/api/v1/agent", async (req, res) => {
   const { message, thread_id } = req.body;
   try {
     const result = await agent.invoke(
