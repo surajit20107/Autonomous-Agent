@@ -1,4 +1,3 @@
-import "dotenv/config";
 import { createAgent } from "langchain";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { tool } from "langchain";
@@ -34,33 +33,8 @@ const model = new ChatGoogleGenerativeAI({
   apiKey: api_key,
 });
 
-const agent = createAgent({
+export const agent = createAgent({
   model,
   tools: [get_todos],
   checkpointer,
 });
-
-const result = await agent.invoke({
-  messages: [
-    {
-      role: "user",
-      content: "tell me the todo with id 4",
-    },
-  ],
-}, {
-  configurable: { thread_id: 420 }
-});
-
-const result2 = await agent.invoke({
-  messages: [
-    {
-      role: "user",
-      content: "which todo you just fetched ?",
-    },
-  ],
-}, {
-  configurable: { thread_id: 420 }
-});
-
-console.log(result?.messages?.at(-1)?.content)
-console.log("Result 2:", result2?.messages?.at(-1)?.content)
