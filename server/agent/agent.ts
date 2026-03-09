@@ -1,7 +1,7 @@
 import { createAgent } from "langchain";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { tool } from "langchain";
-import { MemorySaver } from "@langchain/langgraph"
+import { MemorySaver } from "@langchain/langgraph";
 import { z } from "zod";
 
 const api_key = process.env.GEMINI_API_KEY;
@@ -28,6 +28,24 @@ const get_todos = tool(
   },
 );
 
+const code_execution = tool(
+  async ({ code }: { code: string }) => {
+    const result = await eval(code);
+    return result;
+  },
+  {
+    name: "code_execution",
+    description: "Execute JavaScript code in Node.js and return the result. The code can use fetch() to call external APIs and retrieve live internet data.",
+    schema: z.object({
+      code: z
+        .string()
+        .describe(
+          "JavaScript code to execute. The code may fetch APIs and return the result.",
+        ),
+    }),
+  },
+);
+
 const model = new ChatGoogleGenerativeAI({
   model: "gemini-2.5-flash-lite",
   apiKey: api_key,
@@ -35,6 +53,21 @@ const model = new ChatGoogleGenerativeAI({
 
 export const agent = createAgent({
   model,
-  tools: [get_todos],
+  tools: [get_todos, code_execution],
   checkpointer,
+  systemPrompt: `
+You are an AI agent that can execute JavaScript code using the code_execution tool.
+
+The code_execution tool runs Node.js code and CAN access the internet using fetch().
+
+If the user asks for:
+- crypto prices
+- weather
+- live data
+- API information
+
+You MUST generate JavaScript code and call the code_execution tool to fetch the data.
+
+Never say you cannot access external data.
+`,
 });

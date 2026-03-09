@@ -12,25 +12,57 @@ app.use(cors());
 app.get("/", (_, res) => {
   res.status(200).json({
     message: "API up and running 🚀",
-  })
+  });
 });
 
 app.post("/api/agent", async (req, res) => {
   const { message, thread_id } = req.body;
-  const result = await agent.invoke({
-    messages: [{
-      role: "user",
-      content: message,
-    }]
-  }, {
-    configurable: { thread_id}
-  })
+  const result = await agent.invoke(
+    {
+      messages: [
+        {
+          role: "user",
+          content: message,
+        },
+      ],
+    },
+    {
+      configurable: { thread_id },
+    },
+  );
 
   res.json({
-    message: result.messages?.at(-1)?.content
-  })
-})
+    message: result.messages?.at(-1)?.content,
+  });
+});
+
+app.post("/api/agent/2", async (req, res) => {
+  const { message, thread_id } = req.body;
+  try {
+    const result = await agent.invoke(
+      {
+        messages: [
+          {
+            role: "user",
+            content: message,
+          },
+        ],
+      },
+      {
+        configurable: { thread_id },
+      },
+    );
+    res.status(200).json({
+      message: result.messages?.at(-1)?.content,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error processing request",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+});
 
 app.listen(port, () => {
-  console.log(`Server running on port: ${port}`)
-})
+  console.log(`Server running on port: ${port}`);
+});
