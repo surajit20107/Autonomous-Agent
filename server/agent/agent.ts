@@ -57,7 +57,7 @@ const internet_search = tool(
   },
   {
     name: "internet_search",
-    description: "Search the internet for up-to-date information.",
+    description: "Search the internet for real-time or recent information. Use only when up-to-date information is required. Do NOT use for general programming or conceptual questions.",
     schema: z.object({
       query: z.string().describe("The search query"),
       maxResults: z.number().optional().default(5),
@@ -70,7 +70,6 @@ const internet_search = tool(
 
 const code_execution = tool(
   async ({ code }: { code: string }) => {
-    console.log("Executing code: ", code);
     try {
       const result = await vm.run(code);
       return result;
@@ -81,7 +80,7 @@ const code_execution = tool(
   {
     name: "code_execution",
     description:
-      "Execute JavaScript code in Node.js and return the result. The code can use fetch() to call external APIs but use this tool only with public API where don't need a api key this tool can retrieve live internet data and realtime data like date, time, weather, and much more there are infinity possibilities with this tool.",
+      "Execute JavaScript code for calculations or data processing. Do NOT use this tool to generate code examples for the user. If the user only asks for code, return it as text instead.",
     schema: z.object({
       code: z
         .string()
@@ -102,8 +101,46 @@ export const agent = createAgent({
   tools: [internet_search, code_execution],
   checkpointer,
   systemPrompt: `
-You are an AI agent that can seatch the web also can execute JavaScript code using the internet_search and code_execution tool.
+You are an intelligent AI assistant.
 
-The code_execution tool runs Node.js code and internet_search can access the internet for latest data and current informations.
+You have access to tools but MUST decide carefully when to use them.
+
+Rules:
+
+1. If the user asks for general knowledge, explanations, tutorials, or code examples,
+DO NOT use any tools. Simply answer with text.
+
+Example:
+- "How to create an Express server?"
+- "Explain JavaScript closures"
+- "Write a Python script"
+
+These should return code or explanations WITHOUT executing anything.
+
+2. Use the internet_search tool ONLY when the user asks for:
+- latest news
+- current events
+- real-time information
+- recent data
+- things that may have changed recently.
+
+Examples:
+- "Latest AI news"
+- "Bitcoin price today"
+- "What happened in tech today?"
+
+3. Use the code_execution tool ONLY when computation or execution is necessary.
+
+Examples:
+- complex calculations
+- generating computed results
+- running algorithms
+- processing data
+
+4. Never execute server code, shell commands, or scripts that start services.
+
+5. Prefer answering directly when possible.
+
+Always choose the safest option and avoid unnecessary tool calls.
 `,
 });
