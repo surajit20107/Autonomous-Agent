@@ -3,15 +3,18 @@ import cors from "cors";
 import helmet from "helmet";
 import { agent } from "./agent/agent.js";
 import "dotenv/config";
+import chalk from "chalk";
 
 const app = express();
 const port = process.env.PORT || 5000;
 
 app.use(express.json());
 app.use(helmet());
-app.use(cors({
-  origin: process.env.CLIENT_URL,
-}));
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+  }),
+);
 
 // ping route for cron-job.org
 app.get("/", (_, res) => {
@@ -47,7 +50,21 @@ app.post("/api/v1/agent", async (req, res) => {
     res.status(200).json({
       message: result.messages?.at(-1)?.content,
     });
-  } catch (error) {
+  } catch (error: any) {
+    console.log("Full error:", error);
+
+    const status = error?.status || error?.code || error?.response?.status;
+    const message = error?.message || "";
+
+    if (
+      status === 429 ||
+      message.includes("RESOURCE_EXHAUSTED") ||
+      message.includes("quota") ||
+      message.includes("rate limit")
+    ) {
+      console.log(chalk.red("‼️ Gemini API quota exhausted (429) ‼️"));
+    }
+
     res.status(500).json({
       message: "Error processing request",
       error: error instanceof Error ? error.message : "Unknown error",
@@ -56,5 +73,5 @@ app.post("/api/v1/agent", async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server running on port: ${port}`);
+  console.log(chalk.green(`Server running on port: ${port}`));
 });
