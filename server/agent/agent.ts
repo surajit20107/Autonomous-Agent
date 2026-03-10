@@ -3,6 +3,7 @@ import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { tool } from "langchain";
 import { MemorySaver } from "@langchain/langgraph";
 import { z } from "zod";
+import { TavilySearch } from "@langchain/tavily";
 import { NodeVM } from "vm2";
 import "dotenv/config";
 
@@ -28,21 +29,43 @@ const vm = new NodeVM({
   },
 });
 
-const get_todos = tool(
-  async ({ query }: { query: string }) => {
-    const todos = await fetch(
-      `https://jsonplaceholder.typicode.com/todos/${query}`,
-    );
-    const data = await todos.json();
-    return data;
+const tavily = new TavilySearch({
+  tavilyApiKey: process.env.TAVILY_API_KEY as string,
+})
+
+const internet_search = tool(
+  async ({
+    query,
+    maxResults = 5,
+    topic = "general",
+    searchDepth = "advanced",
+    includeRawContent = false,
+  }: {
+    query: string;
+    maxResults?: number;
+    topic?: "general" | "news" | "finance";
+    searchDepth?: "basic" | "advanced";
+    includeRawContent?: boolean;
+  }) => {
+    return await tavily.invoke({
+      query,
+      maxResults,
+      topic,
+      searchDepth,
+      includeRawContent,
+    });
   },
   {
-    name: "get_todos",
-    description: "get todos from the api",
+    name: "internet_search",
+    description: "Search the internet for up-to-date information.",
     schema: z.object({
-      query: z.string().describe("the todo id to fetch"),
+      query: z.string().describe("The search query"),
+      maxResults: z.number().optional().default(5),
+      topic: z.enum(["general", "news", "finance"]).optional().default("general"),
+      searchDepth: z.enum(["basic", "advanced"]).optional().default("advanced"),
+      includeRawContent: z.boolean().optional().default(false),
     }),
-  },
+  }
 );
 
 const code_execution = tool(
@@ -76,21 +99,11 @@ const model = new ChatGoogleGenerativeAI({
 
 export const agent = createAgent({
   model,
-  tools: [code_execution],
+  tools: [internet_search, code_execution],
   checkpointer,
   systemPrompt: `
-You are an AI agent that can execute JavaScript code using the code_execution tool.
+You are an AI agent that can seatch the web also can execute JavaScript code using the internet_search and code_execution tool.
 
-The code_execution tool runs Node.js code and CAN access the internet using fetch().
-
-If the user asks for:
-- crypto prices
-- weather
-- live data
-- API information
-
-You MUST generate JavaScript code and call the code_execution tool to fetch the data.
-
-Never say you cannot access external data.
+The code_execution tool runs Node.js code and internet_search can access the internet for latest data and current informations.
 `,
 });
