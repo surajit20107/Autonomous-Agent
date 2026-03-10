@@ -62,10 +62,10 @@ export default function Home() {
       // Assuming your API returns a JSON object with a 'response' or 'text' field
       // Adjust this based on your actual API response structure
       const data = await response.json(); 
-      console.log(data);
+      
       const aiMessage = {
         id: generateId(),
-        text: data.message ?? "Agent having some trouble, Please try again later",
+        text: Array.isArray(data.message) ? data.message.map((item: any) => item.text).join("") : data.message ?? "Agent having some trouble, Please try again later",
         sender: 'ai' as const,
         thread_id: threadId
       };
