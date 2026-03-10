@@ -33,10 +33,6 @@ const apiKey = getCurrentKey();
 
 const checkpointer = new MemorySaver();
 
-if (!api_key) {
-  throw new Error("GEMINI_API_KEY is not defined");
-}
-
 const vm = new NodeVM({
   console: "redirect",
   sandbox: {
