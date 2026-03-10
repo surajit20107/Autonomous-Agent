@@ -13,12 +13,21 @@ app.use(cors({
   origin: process.env.CLIENT_URL,
 }));
 
+// ping route for cron-job.org
 app.get("/", (_, res) => {
   res.status(200).json({
     message: "API up and running 🚀",
   });
 });
 
+// ping route for uptime robot
+app.head("/", (_, res) => {
+  res.status(200).json({
+    message: "API up and running 🚀",
+  });
+});
+
+// agent route
 app.post("/api/v1/agent", async (req, res) => {
   const { message, thread_id } = req.body;
   try {
