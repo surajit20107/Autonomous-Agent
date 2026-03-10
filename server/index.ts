@@ -4,6 +4,7 @@ import helmet from "helmet";
 import { agent } from "./agent/agent.js";
 import "dotenv/config";
 import chalk from "chalk";
+import { rotateKey } from "./agent/agent.js";
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -64,7 +65,7 @@ app.post("/api/v1/agent", async (req, res) => {
     ) {
       console.log(chalk.red("‼️Gemini API quota exhausted‼️"));
     }
-
+    rotateKey();
     res.status(500).json({
       message: "Error processing request",
       error: error instanceof Error ? error.message : "Unknown error",

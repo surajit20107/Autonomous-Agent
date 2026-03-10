@@ -5,9 +5,31 @@ import { MemorySaver } from "@langchain/langgraph";
 import { z } from "zod";
 import { TavilySearch } from "@langchain/tavily";
 import { NodeVM } from "vm2";
+import chalk from "chalk";
 import "dotenv/config";
 
-const api_key = process.env.GEMINI_API_KEY;
+// const api_key = process.env.GEMINI_API_KEY;
+
+const api_key = [
+  process.env.GEMINI_API_KEY_1,
+  process.env.GEMINI_API_KEY_2,
+  process.env.GEMINI_API_KEY_3,
+  process.env.GEMINI_API_KEY_4,
+  process.env.GEMINI_API_KEY_5,
+].filter(Boolean);
+
+let currentApiKeyIndex = 0;
+
+function getCurrentKey() {
+  return api_key[currentApiKeyIndex]
+}
+
+export function rotateKey() {
+  currentApiKeyIndex = (currentApiKeyIndex + 1) % api_key.length;
+  console.log(chalk.yellow(`⚠️ Rotating API key to index ${currentApiKeyIndex}`))
+}
+
+const apiKey = getCurrentKey();
 
 const checkpointer = new MemorySaver();
 
@@ -93,7 +115,7 @@ const code_execution = tool(
 
 const model = new ChatGoogleGenerativeAI({
   model: "gemini-2.5-flash-lite",
-  apiKey: api_key,
+  apiKey: apiKey as string,
 });
 
 export const agent = createAgent({
