@@ -51,7 +51,7 @@ app.post("/api/v1/agent", async (req, res) => {
       message: result.messages?.at(-1)?.content,
     });
   } catch (error: any) {
-    console.log("Full error:", error);
+    // console.log("Full error:", error);
 
     const status = error?.status || error?.code || error?.response?.status;
     const message = error?.message || "";
@@ -62,7 +62,7 @@ app.post("/api/v1/agent", async (req, res) => {
       message.includes("quota") ||
       message.includes("rate limit")
     ) {
-      console.log(chalk.red("‼️ Gemini API quota exhausted (429) ‼️"));
+      console.log(chalk.red("‼️Gemini API quota exhausted‼️"));
     }
 
     res.status(500).json({
