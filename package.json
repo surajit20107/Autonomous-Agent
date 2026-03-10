@@ -1,0 +1,13 @@
+{
+  "name": "autonomous-agent",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently 'cd server && npm run start' 'cd client && npm run dev'"
+  },
+  "author": "https://github.com/surajit20107",
+  "license": "ISC",
+  "dependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

@@ -4,7 +4,7 @@ import { agent } from "./agent/agent.js";
 import "dotenv/config";
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 
 app.use(express.json());
 app.use(cors());
@@ -15,26 +15,26 @@ app.get("/", (_, res) => {
   });
 });
 
-app.post("/api/agent", async (req, res) => {
-  const { message, thread_id } = req.body;
-  const result = await agent.invoke(
-    {
-      messages: [
-        {
-          role: "user",
-          content: message,
-        },
-      ],
-    },
-    {
-      configurable: { thread_id },
-    },
-  );
+// app.post("/api/agent", async (req, res) => {
+//   const { message, thread_id } = req.body;
+//   const result = await agent.invoke(
+//     {
+//       messages: [
+//         {
+//           role: "user",
+//           content: message,
+//         },
+//       ],
+//     },
+//     {
+//       configurable: { thread_id },
+//     },
+//   );
 
-  res.json({
-    message: result.messages?.at(-1)?.content,
-  });
-});
+//   res.json({
+//     message: result.messages?.at(-1)?.content,
+//   });
+// });
 
 app.post("/api/v1/agent", async (req, res) => {
   const { message, thread_id } = req.body;
