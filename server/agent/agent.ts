@@ -58,7 +58,7 @@ const code_execution = tool(
   {
     name: "code_execution",
     description:
-      "Execute JavaScript code in Node.js and return the result. The code can use fetch() to call external APIs and retrieve live internet data and realtime data like date, time, weather, and much more there are infinity possibilities with this tool.",
+      "Execute JavaScript code in Node.js and return the result. The code can use fetch() to call external APIs but use this tool only with public API where don't need a api key this tool can retrieve live internet data and realtime data like date, time, weather, and much more there are infinity possibilities with this tool.",
     schema: z.object({
       code: z
         .string()
